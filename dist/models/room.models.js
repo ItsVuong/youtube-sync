@@ -23,66 +23,27 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.build = exports.Video = void 0;
+exports.Video = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const videoSchema = new mongoose_1.Schema({
+const roomSchema = new mongoose_1.Schema({
     title: {
         type: String,
         required: [true, "Title can not be empty"]
     },
-    url: {
-        type: String,
-        required: [true, "Video url can not be empty"]
+    createdAt: {
+        type: Date()
     },
-    html: {
-        type: String,
-        require: true
+    isEmpty: {
+        type: Boolean,
+        required: true
     },
-    thumbnail_url: {
+    password: {
         type: String,
-        required: [true, "Thumbnail can not be empty"]
-    },
-    provider_name: {
-        type: String,
-        require: true
-    },
-    author_name: {
-        type: String,
-        require: true
+        require: false
     }
 });
-const Video = mongoose_1.default.model('Video', videoSchema);
+const Video = mongoose_1.default.model('Video', roomSchema);
 exports.Video = Video;
 const build = (attr) => {
     return new Video(attr);
 };
-exports.build = build;
-// const mongoose = require('mongoose');
-// const VideoSchema = mongoose.Schema({
-//     title: {
-//         type: String,
-//         required:[true, "Title can not be empty"]
-//     },
-//     url:{
-//         type: String,
-//         require:true
-//     },
-//     html:{
-//         type: String,
-//         require: true
-//     },
-//     thumbnail_url: {
-//         type: String,
-//         require: true
-//     },
-//     provider_name: {
-//         type: String,
-//         require: true
-//     },
-//     author_name: {
-//         type: String,
-//         require: true
-//     }
-// });
-// const Video = mongoose.model("Video", VideoSchema);
-// module.exports = Video;

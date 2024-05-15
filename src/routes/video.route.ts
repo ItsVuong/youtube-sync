@@ -10,6 +10,9 @@ const videoController = require('../controllers/video.controller');
 
 router.post('', videoController.addVideo); 
 
-router.get('', videoController.getAllVids);
+router.get('', (req, res , next) => {
+    console.log(req.headers.cookie);     
+    videoController.getAllVids(req, res, next);
+});
 
 export default router;  
