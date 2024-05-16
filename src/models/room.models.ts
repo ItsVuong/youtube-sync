@@ -26,7 +26,6 @@ const roomSchema = new Schema(
     {
         _id: {
             type: String,
-            default: nanoid()
           },
 
         createdAt: {
@@ -96,17 +95,13 @@ const roomSchema = new Schema(
 );
 
 roomSchema.pre('save', function (next) {
-    // console.log(this)
+    if (this.isNew){
     const username = usernameGen()
-    console.log(username);
+    // console.log('generating id: ', nanoid(12));
+    this._id = nanoid(12);
     this.users[0].username = username;
-    return next();
+    return next();}
 })
-
-roomSchema.pre('findOneAndUpdate', function() {
-    console.log(this.getFilter()); // { name: 'John' }
-    console.log(this.getUpdate()); // { age: 30 }
-  });
 
 roomSchema.methods.generateUsername = async function () {
     const room = this as RoomDocument;

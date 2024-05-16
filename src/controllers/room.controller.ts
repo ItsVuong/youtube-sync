@@ -4,11 +4,7 @@ import { roomService } from "../services/room.service";
 // users: { $not: { $elemMatch: { active: true } } }
 const createRoom = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const roomData = {
-            
-        };
-
-        const room = await roomService.createRoom();
+        const room = await roomService.createRoom(req.sessionID);
         res.status(200).json(room);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
