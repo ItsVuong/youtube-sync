@@ -25,7 +25,7 @@ const createRoom = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
 });
 const joinRoom = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const roomId = req.params.id;
-    const result = yield room_models_1.Room.findOneAndUpdate({ _id: roomId }, { $push: { users: { sessionId: req.sessionID } } });
+    const result = yield room_models_1.Room.findOneAndUpdate({ _id: roomId }, { $push: { users: { sessionId: req.sessionID, username: 'flying racoon' } } }, { runValidators: true });
     res.status(200).json(result);
 });
 exports.roomController = {

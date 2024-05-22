@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { usernameGen } from '../utils/username-generator';
 
 interface RoomDocument extends Document {
-    _id: mongoose.Types.ObjectId;
+    _id: string;
     createdAt: Date;
     password?: String;
     users: [{
@@ -12,12 +12,12 @@ interface RoomDocument extends Document {
         isActive: Boolean
     }];
     playlist: [{
-            title: String,
-            url: String,
-            html: String,
-            thumbnail_url: String,
-            provider_name: String,
-            author_name: String
+        title: String,
+        url: String,
+        html: String,
+        thumbnail_url: String,
+        provider_name: String,
+        author_name: String
     }];
     lastActivity: Date
 }
@@ -26,7 +26,7 @@ const roomSchema = new Schema(
     {
         _id: {
             type: String,
-          },
+        },
 
         createdAt: {
             type: Date,
@@ -40,43 +40,43 @@ const roomSchema = new Schema(
 
         users: {
             type: [{
-                    sessionId: {type: String, require:true},
-                    username: {type: String, require: true},
-                    isActive: {
-                        type: Boolean,
-                        default: true
-                    }
-                }], 
+                sessionId: { type: String, require: true },
+                username: { type: String, require: true },
+                isActive: {
+                    type: Boolean,
+                    default: true
+                }
+            }],
             default: []
         },
 
         playlist: {
-            type:[{
+            type: [{
                 title: {
                     type: String,
                     required: [true, "Title can not be empty"]
                 },
-        
+
                 url: {
                     type: String,
                     required: [true, "Video url can not be empty"]
                 },
-        
+
                 html: {
                     type: String,
                     require: true
                 },
-        
+
                 thumbnail_url: {
                     type: String,
                     required: [true, "Thumbnail can not be empty"]
                 },
-        
+
                 provider_name: {
                     type: String,
                     require: true
                 },
-        
+
                 author_name: {
                     type: String,
                     require: true
@@ -91,25 +91,41 @@ const roomSchema = new Schema(
             // partialFilterExpression: { activeUsers : [] },
             // expires: 60
         }
-    }    
+    }
 );
 
 roomSchema.pre('save', function (next) {
-    if (this.isNew){
-    const username = usernameGen()
-    // console.log('generating id: ', nanoid(12));
-    this._id = nanoid(12);
-    this.users[0].username = username;
-    return next();}
+    if (this.isNew) {
+        this._id = nanoid(12);
+        return next();
+    }
 })
 
-roomSchema.methods.generateUsername = async function () {
-    const room = this as RoomDocument;
-    let usernames: string[] = room.users.map((user: any) => user.username);
-    return usernameGen();
-}
+roomSchema.pre('findOneAndUpdate', async function (next) {
+    const updateData = this.getUpdate() as { '$push': { users: { sessionId?: string, username?: string } } };
+    const updateQuery = this.getQuery() as { _id: string };
 
-const Room = mongoose.model('Room', roomSchema);
+    if (updateData.$push.users) {
+        const roomModel = mongoose.model<RoomDocument>('Room', roomSchema);
+        const document: RoomDocument = (await roomModel.findOne({ _id: updateQuery._id }).lean())
+
+        const usernameArray = document?.users.map(user => user.username);
+        if (usernameArray && usernameArray.includes(updateData.$push.users.username)) {
+            throw new Error('Duplicate username error');
+        }
+
+        const userSessionArray = document?.users.map(user => user.sessionId);
+        if (userSessionArray && userSessionArray.includes(updateData.$push.users.sessionId)) {
+            throw new Error('Duplicate sessionId error')
+        }
+    }
 
 
-export {Room, RoomDocument};
+    next();
+});
+
+
+const Room = mongoose.model<RoomDocument>('Room', roomSchema);
+
+
+export { Room, RoomDocument };

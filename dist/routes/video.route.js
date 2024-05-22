@@ -9,5 +9,8 @@ const router = (0, express_1.Router)();
 // const router = express.Router();
 const videoController = require('../controllers/video.controller');
 router.post('', videoController.addVideo);
-router.get('', videoController.getAllVids);
+router.get('', (req, res, next) => {
+    console.log(req.headers.cookie);
+    videoController.getAllVids(req, res, next);
+});
 exports.default = router;

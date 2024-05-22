@@ -8,5 +8,6 @@ const roomRouter = Router();
 // router.post('', videoController.addVideo); 
 
 roomRouter.get('', roomController.createRoom);
-
+roomRouter.get('/:id', roomController.joinRoom)
+roomRouter.post('/:id/playlist', roomController.addToPlaylist)
 export default roomRouter;   
