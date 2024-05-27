@@ -8,7 +8,7 @@ import cron from 'node-cron';
 import { Room } from "./models/room.models";
 import router from "./routes/index.route";
 import http from 'http';
-import { Server } from 'socket.io'
+import socketServer from "./utils/socketio";
 dotenv.config();
 
 const app: Express = express();
@@ -17,29 +17,12 @@ const SOCKET_PORT = process.env.SOCKET_PORT;
 app.use(express.json());
 app.use(cors<Request>({
     origin: process.env.FRONT_END_URL,
-    optionsSuccessStatus: 200 ,
-    credentials: true 
+    optionsSuccessStatus: 200,
+    credentials: true
 }));
 
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: process.env.FRONT_END_URL,
-        methods: ['GET', 'POST'],
-    },
-});
-
-io.on('connection', (socket) => {
-    console.log(`⚡: ${socket.id} user just connected!`);
-    socket.on('disconnect', () => {
-      console.log('🔥: A user disconnected');
-    });
-
-    socket.on('add-video', (value) => {
-        console.log(value)
-    })
-})
-
+socketServer(server, SOCKET_PORT);
 
 mongoose
     .connect(String(process.env.MONGODB_URL))
@@ -57,7 +40,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        maxAge: 60000,
+        maxAge: 60000 * 60 * 12,
         httpOnly: true,
     },
     store: MongoStore.create({
@@ -74,7 +57,7 @@ declare module 'express-session' {
 
 
 
-cron.schedule('*/59 * * * *', async function () {
+cron.schedule('0 1 * * *', async function () {
     const threshold = Date.now() - (60 * 1000);
     console.log(new Date(threshold).toISOString())
     await Room.deleteMany({
@@ -82,7 +65,6 @@ cron.schedule('*/59 * * * *', async function () {
     });
 });
 
-io.listen(Number(SOCKET_PORT));
 app.listen(
     API_PORT, () => {
         try { console.log(`Server is running on port ${API_PORT}`) }

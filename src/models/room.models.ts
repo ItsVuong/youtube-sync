@@ -5,19 +5,20 @@ import { usernameGen } from '../utils/username-generator';
 interface RoomDocument extends Document {
     _id: string;
     createdAt: Date;
-    password?: String;
+    password?: string;
     users: [{
-        sessionId: String,
-        username: String,
+        sessionId: string,
+        username: string,
         isActive: Boolean
     }];
     playlist: [{
-        title: String,
-        url: String,
-        html: String,
-        thumbnail_url: String,
-        provider_name: String,
-        author_name: String
+        _id: string,
+        title: string,
+        url: string,
+        html: string,
+        thumbnail_url: string,
+        provider_name: string,
+        author_name: string
     }];
     lastActivity: Date
 }
@@ -105,7 +106,7 @@ roomSchema.pre('findOneAndUpdate', async function (next) {
     const updateData = this.getUpdate() as { '$push': { users: { sessionId?: string, username?: string } } };
     const updateQuery = this.getQuery() as { _id: string };
 
-    if (updateData.$push.users) {
+    if (updateData.$push?.users) {
         const roomModel = mongoose.model<RoomDocument>('Room', roomSchema);
         const document: RoomDocument = (await roomModel.findOne({ _id: updateQuery._id }).lean())
 
@@ -119,8 +120,6 @@ roomSchema.pre('findOneAndUpdate', async function (next) {
             throw new Error('Duplicate sessionId error')
         }
     }
-
-
     next();
 });
 
